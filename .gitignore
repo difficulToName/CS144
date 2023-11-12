@@ -1,6 +1,7 @@
 /build
 .idea/
 cmake-build-debug/
+.DS_Store
 /.ccls-cache
 /.vscode
 *.swp
