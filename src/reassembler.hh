@@ -4,13 +4,31 @@
 
 #include <string>
 
+#include <map>
+
+#include <list>
+
+struct Interval{
+  uint64_t start;
+  uint64_t end;
+  std::string str;
+  Interval() = delete;
+  explicit Interval(uint64_t _start, std::string _str) : start(_start),  end(_start + _str.size()), str(std::move(_str)){}
+};
+
 class Reassembler
 {
+private:
+  bool is_last = false;
+
+  uint64_t pending = 0;
+
+  std::list<Interval> discrete_str{};
 public:
   /*
    * Insert a new substring to be reassembled into a ByteStream.
    *   `first_index`: the index of the first byte of the substring
-   *   `data`: the substring itself
+   *   `data`: the substring itselfend_e
    *   `is_last_substring`: this substring represents the end of the stream
    *   `output`: a mutable reference to the Writer
    *

@@ -28,19 +28,30 @@
 // requests with the [Address Resolution Protocol](\ref rfc::rfc826).
 // In the opposite direction, the network interface accepts Ethernet
 // frames, checks if they are intended for it, and if so, processes
-// the the payload depending on its type. If it's an IPv4 datagram,
+// the payload depending on its type. If it's an IPv4 datagram,
 // the network interface passes it up the stack. If it's an ARP
 // request or reply, the network interface processes the frame
 // and learns or replies as necessary.
+
+struct ARP_Data
+{
+  EthernetAddress mac_address {};
+  uint64_t place_time {};
+};
+
 class NetworkInterface
 {
 private:
   // Ethernet (known as hardware, network-access, or link-layer) address of the interface
+  uint64_t current_time_ms { 0 };
+  std::queue<EthernetFrame> send_queue {};
+  std::unordered_map<uint32_t, ARP_Data> ARP_map {};
+  std::unordered_map<uint32_t, uint64_t> ARP_flood_prevent {};
+  std::unordered_map<uint32_t, std::vector<EthernetFrame>> no_mac_address_frame {};
   EthernetAddress ethernet_address_;
 
   // IP (known as Internet-layer or network-layer) address of the interface
   Address ip_address_;
-
 public:
   // Construct a network interface with given Ethernet (network-access-layer) and IP (internet-layer)
   // addresses

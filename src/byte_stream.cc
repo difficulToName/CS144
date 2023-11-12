@@ -8,70 +8,83 @@ ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
 
 void Writer::push( string data )
 {
-  // Your code here.
-  (void)data;
+  if ( available_capacity() == 0 || data.empty() ) {
+    return;
+  }
+  auto length = min( data.size(), available_capacity() );
+  data.resize( length );
+  data_buffer_.emplace_back( std::move( data ) );
+  view_buffer.emplace_back( data_buffer_.back().c_str(), length );
+  buffering += length;
+  sent += length;
 }
 
 void Writer::close()
 {
-  // Your code here.
+  writer_closed = true;
 }
 
 void Writer::set_error()
 {
-  // Your code here.
+  writer_error = true;
 }
 
 bool Writer::is_closed() const
 {
-  // Your code here.
-  return {};
+  return writer_closed;
 }
 
 uint64_t Writer::available_capacity() const
 {
-  // Your code here.
-  return {};
+  return capacity_ - buffering;
 }
 
 uint64_t Writer::bytes_pushed() const
 {
-  // Your code here.
-  return {};
+  return sent;
 }
 
 string_view Reader::peek() const
 {
-  // Your code here.
-  return {};
+  if ( data_buffer_.empty() ) {
+    return {};
+  }
+
+  return { view_buffer.front() };
 }
 
 bool Reader::is_finished() const
 {
-  // Your code here.
-  return {};
+  return data_buffer_.empty() && writer_closed;
 }
 
 bool Reader::has_error() const
 {
-  // Your code here.
-  return {};
+  return writer_error;
 }
 
 void Reader::pop( uint64_t len )
 {
-  // Your code here.
-  (void)len;
+  len = min( len, buffering );
+  buffering -= len;
+  popped += len;
+  while ( len > 0 ) {
+    auto str_len = view_buffer.front().size();
+    if ( str_len > len ) {
+      view_buffer.front().remove_prefix( len );
+      return;
+    }
+    view_buffer.pop_front();
+    data_buffer_.pop_front();
+    len -= str_len;
+  }
 }
-
 uint64_t Reader::bytes_buffered() const
 {
-  // Your code here.
-  return {};
+  return buffering;
 }
 
 uint64_t Reader::bytes_popped() const
 {
-  // Your code here.
-  return {};
+  return popped;
 }

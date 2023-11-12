@@ -12,6 +12,13 @@ class ByteStream
 {
 protected:
   uint64_t capacity_;
+  std::deque<std::string_view> view_buffer{};
+  std::deque<std::string> data_buffer_{};
+  uint64_t sent = 0;
+  uint64_t popped = 0;
+  uint64_t buffering = 0;
+  bool writer_closed = false;
+  bool writer_error = false;
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
 
 public:
@@ -33,8 +40,8 @@ public:
   void set_error(); // Signal that the stream suffered an error.
 
   bool is_closed() const;              // Has the stream been closed?
-  uint64_t available_capacity() const; // How many bytes can be pushed to the stream right now?
-  uint64_t bytes_pushed() const;       // Total number of bytes cumulatively pushed to the stream
+  uint64_t available_capacity() const; // How many bytes can be _send_queue to the stream right now?
+  uint64_t bytes_pushed() const;       // Total number of bytes cumulatively _send_queue to the stream
 };
 
 class Reader : public ByteStream
@@ -46,7 +53,7 @@ public:
   bool is_finished() const; // Is the stream finished (closed and fully popped)?
   bool has_error() const;   // Has the stream had an error?
 
-  uint64_t bytes_buffered() const; // Number of bytes currently buffered (pushed and not popped)
+  uint64_t bytes_buffered() const; // Number of bytes currently buffered (_send_queue and not popped)
   uint64_t bytes_popped() const;   // Total number of bytes cumulatively popped from stream
 };
 
